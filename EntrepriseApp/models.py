@@ -3,6 +3,7 @@ from django.contrib.auth.models import AbstractUser
 from django.core.validators import MinLengthValidator
 from django.core.validators import RegexValidator
 from django.core.exceptions import ValidationError
+from django.utils import timezone 
 
 
 def validate_email(value):
@@ -22,9 +23,21 @@ class Utilisateur(AbstractUser):
     ], default='chargeur')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    def save(self,*args,**kwargs):
+        if not self.user_id:
+            annee = timezone.now().strftime('%y')
+            prefix = f"{annee}user"
+            dernier = Utilisateur.objects.filter(user_id__startswith=prefixe).order_by('-user_id').first()
+            compteur = int(dernier.user_id[-2:]) + 1 if dernier else 0
+            if compteur > 99:
+                raise ValidationError()
+            self.user_id = f"{prefix}{compteur:02d}"
 
 matricule_fiscale_Validator = RegexValidator(regex=r'^\d{7}[/ -]?[A-Za-z][/ -]?[ABDNPEadbnpe][/ -]?[MPCNEmpcne][/ -]?\d{3}$',message="Format attendu : 7 chiffres , 1 lettre (cle de controle) , 1 lettre(A/B/D/N/P) , 1 lettre (M/P/C/N/E) , 3 chiffres")
    
+def emailvalidator(value):
+    if not value.lower().endswith('@gmail.com'):
+        raise ValidationError('Seuls les emails avec le domaine @gmail.com peruvent etre acceptes')
 
 class Entreprise(models.Model):
     raison_sociale = models.CharField(
@@ -40,7 +53,7 @@ class Entreprise(models.Model):
         unique=True,
         validators=[matricule_fiscale_Validator]
     )
-    adresse = models.TextField(validators=[MinLengthValidator(20,"L adresse doit contenir au moins 20 caracteres")])
+    adresse = models.TextField(validators=[MinLengthValidator(20,"L adresse doit contenir au moins 20 caracteres"), emailvalidator])
     type_entreprise = models.CharField(
         max_length=100,
         choices=[

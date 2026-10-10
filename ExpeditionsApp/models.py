@@ -3,17 +3,17 @@ from EntrepriseApp.models import Entreprise
 import uuid
 from django.core.exceptions import ValidationError
 from django.utils import timezone
+from django.core.validators import MinValueValidator
 
 class Expeditions(models.Model):
     reference = models.CharField(
         max_length=200,
         null=False,
         blank=False,
-        unique = True,
-        default = uuid.uuid4
+        unique = True
     )
     poids_kg = models.DecimalField(
-        max_digits=10,decimal_places=2
+        max_digits=10,decimal_places=2,validators=[MinValueValidator(0.01)]
     )
     statut= models.CharField(
         max_length=100,
@@ -29,7 +29,7 @@ class Expeditions(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
-
+    
 
     entreprise = models.ForeignKey(
         Entreprise,
