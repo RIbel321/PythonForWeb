@@ -50,22 +50,22 @@ class Offre(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def clean(self):
-        if (self.transporteur_id and self.type_transporteur != 'transporteur'):
+        if (self.transporteur_id and self.transporteur.type_transporteur != 'transporteur'):
             raise ValidationError({'Entreprise':'doit etre de type transporteur'})
-        if (self.transporteur_id and self.vehicule_id):
-            if self.vehicule.entreprise_id != self.transporteur_id :
+        if (self.transporteur_id and self.vehicule.vehicule_id):
+            if self.vehicule.entreprise_id != self.transporteur.transporteur_id :
                 raise ValidationError({'Vehicule':'Cette vehicule doit etre avec le meme transporteur que l offre'})
-        if (self.expedition and self.expedition_id.statut != 'publiee'):
+        if (self.expedition and self.expedition.expedition_id.statut != 'publiee'):
             raise ValidationError({'Expedition':'on ne peut pas cree un offre avec une expedition qui n est pas publiee'})
-        if (self.pk and self.expedition_id and self.transporteur_id and self.statut=='proposee'):
-            offres_existantes=Offre.objects.filter(expedition_id=self.expedition_id,transporteur_id=self.transporteur_id
+        if (self.pk and self.expedition.expedition_id and self.transporteur.transporteur_id and self.statut=='proposee'):
+            offres_existantes=Offre.objects.filter(expedition_id=self.expedition.expedition_id,transporteur_id=self.transporteur.transporteur_id
             ,statut='proposee')
             if self.pk:
                 offres_existantes=offres_existantes.exclude(pk=self.pk)
             if offres_existantes.exists():
                 raise ValidationError('Cette entreprise a deja une offre active pour cette expedition')
         if(self.vehicule and not self.vehicule.disponible):
-            raise ValidationError('Cette vehicule n est pas disponible')
+            raise ValidationError('Ce vehicule n est pas disponible')
         if (self.vehicule_id and self.expedition_id):
             poids=self.expedition.poids_kg
             capacites_max = {
