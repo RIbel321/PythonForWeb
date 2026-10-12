@@ -27,7 +27,7 @@ class Utilisateur(AbstractUser):
         if not self.user_id:
             annee = timezone.now().strftime('%y')
             prefix = f"{annee}user"
-            dernier = Utilisateur.objects.filter(user_id__startswith=prefixe).order_by('-user_id').first()
+            dernier = Utilisateur.objects.filter(user_id__startswith=prefix).order_by('-user_id').first()
             compteur = int(dernier.user_id[-2:]) + 1 if dernier else 0
             if compteur > 99:
                 raise ValidationError()
