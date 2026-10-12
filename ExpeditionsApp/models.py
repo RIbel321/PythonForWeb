@@ -12,6 +12,8 @@ class Expeditions(models.Model):
         blank=False,
         unique = True
     )
+
+
     poids_kg = models.DecimalField(
         max_digits=10,decimal_places=2,validators=[MinValueValidator(0.01)]
     )
