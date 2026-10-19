@@ -5,6 +5,11 @@ from django.core.validators import RegexValidator
 from django.core.exceptions import ValidationError
 from django.utils import timezone 
 
+matricule_fiscale_Validator = RegexValidator(regex=r'^\d{7}[/ -]?[A-Za-z][/ -]?[ABDNPEadbnpe][/ -]?[MPCNEmpcne][/ -]?\d{3}$',message="Format attendu : 7 chiffres , 1 lettre (cle de controle) , 1 lettre(A/B/D/N/P) , 1 lettre (M/P/C/N/E) , 3 chiffres")
+   
+def emailvalidator(value):
+    if not value.lower().endswith('@gmail.com'):
+        raise ValidationError('Seuls les emails avec le domaine @gmail.com peruvent etre acceptes')
 
 def validate_email(value):
     if not value :
@@ -32,12 +37,13 @@ class Utilisateur(AbstractUser):
             if compteur > 99:
                 raise ValidationError()
             self.user_id = f"{prefix}{compteur:02d}"
+        self.full_clean()
+        super().save(*args, **kwargs)
+    
+    def __str__(self):
+        return f"(self.reference)"
 
-matricule_fiscale_Validator = RegexValidator(regex=r'^\d{7}[/ -]?[A-Za-z][/ -]?[ABDNPEadbnpe][/ -]?[MPCNEmpcne][/ -]?\d{3}$',message="Format attendu : 7 chiffres , 1 lettre (cle de controle) , 1 lettre(A/B/D/N/P) , 1 lettre (M/P/C/N/E) , 3 chiffres")
-   
-def emailvalidator(value):
-    if not value.lower().endswith('@gmail.com'):
-        raise ValidationError('Seuls les emails avec le domaine @gmail.com peruvent etre acceptes')
+
 
 class Entreprise(models.Model):
     raison_sociale = models.CharField(

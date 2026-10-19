@@ -94,5 +94,5 @@ class Offre(models.Model):
                 self.expedition.statut='attribuee'
                 self.expedition.save()
                 Offre.objects.filter(expedition_id=self.expedition_id,statut='proposee').exclude(pk=self.pk).update(statut='refusee')
-        sef.full_clean()
+        self.full_clean()
         super().save(*args, **kwargs)
