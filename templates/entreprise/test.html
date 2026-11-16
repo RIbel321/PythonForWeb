@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h1>Welcome to Entreprise!</h1>
+<p>This is my entreprise page</p>
+
+<p>Welcome, {{name}} , a {{age}} years old guy from {{city}} </p>
+
+{% for company in Companies %}
+    <p>{{company}}</p>
+
+    {% empty %}
+        <p>No Companies Found</p>
+
+{% endfor %}
+
+{% if is_admin %}
+    <p>Welcome , Admin</p>
+{% else %}
+    <p>You are not an admin</p>
+{% endif %}
+
+{% if role == 'admin' %}
+    <p>Welcome Admin</p>
+{% elif role == 'transporteur' %}
+    <p>Welcome Transporteur</p>
+{% endif %}
+
+{% for entreprise in entreprises %}
+    <p>{{entreprise.matricule_fiscal|lower}}</p> #lower # upper #title #length #capfirst..
+    <p>{{entreprise.created_at|date:"D/F/y H:i"}}</p>
+
+    {% empty %}
+        <p>No entreprises were found</p>
+{% endfor %}
+
+<p>You entered this reference value : {{reference}}</p>
+
+<p>{{entrepriser.matricule_fiscal|lower}}</p>  #lower # upper #title #length #capfirst..
+
+<p>{{entrepriser.created_at|date:"D/F/y H:i"}}</p>
+
+
+
+
+{% endblock %}

@@ -1,66 +1,62 @@
 from django.db import models
 from EntrepriseApp.models import Entreprise
-import uuid
 from django.core.exceptions import ValidationError
+from django.core.validators import MinLengthValidator
 from django.utils import timezone
-from django.core.validators import MinValueValidator
 
-class Expeditions(models.Model):
-    reference = models.CharField(
-        max_length=200,
-        null=False,
-        blank=False,
-        unique = True
-    )
+# Create your models here.
 
 
-    poids_kg = models.DecimalField(
-        max_digits=10,decimal_places=2,validators=[MinValueValidator(0.01)]
-    )
-    statut= models.CharField(
-        max_length=100,
-        choices=[
-            ('publiee', 'Publiee'),
-            ('attribuee', 'Attribuee'),
-            ('en_cours', 'En cours'),
-            ('annulee', 'Annulee'),
-            ('livree', 'Livree'),
-        ],
-        default='publiee'
-    )
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    
-    
+class Expedition(models.Model):
+    reference=models.CharField(max_length=20,unique=True)
+    type_entreprise=models.CharField(max_length=20,choices=[
+        ('chargeur','Chargeur'),
+        ('transporteur','Transporteur')
+    ],default='chargeur')
 
-    entreprise = models.ForeignKey(
+    adresse=models.CharField(default="Tunis",max_length=50,validators=[MinLengthValidator(2)])
+
+    statut=models.CharField(max_length=20,choices=[
+        ('publiee','Publiee'),
+        ('attribuee','Attribuee'),
+        ('en_cours','En_cours'),
+        ('livree','Livree'),
+        ('annulee','Annulee'),
+    ],default='publiee')
+    poids_kg=models.DecimalField(max_digits=20,decimal_places=2,null=False)
+
+    entreprise=models.ForeignKey(
         Entreprise,
-        on_delete=models.CASCADE,
-        related_name='expeditions'
+        on_delete=models.CASCADE
     )
+    created_at=models.DateTimeField(default=timezone.now())
+    updated_at=models.DateTimeField(default=timezone.now())
 
-    def clean(self):#comapring two attributes
-         #
-         #whenever we want to have a validator condition on somehtong out of the class we are working with like here we are making this validator on entreprise whhile we are on expeditions we use the clean function
-        super().clean()
-        if self.entreprise_id and self.entreprise.type_entreprise != "chargeur":
-            raise ValidationError({'entreprise':'Une expedition ne peut etre que par une entreprise de type chargeur'})
+    def save(self,*args,**kwargs):
+        if not self.reference:
+            current_year=str(timezone.localdate().year)[-2:]
+            prefix="EXP"+current_year
 
-    @classmethod    #we aer using this funciton s argument as a class because we arre trieving data so we need a class for them ot get filled in 
-    #this generates a reference not a reference to each instance it only cares about the reference fo the last one the last reference the last person the last to create
-    def _generate_reference(cls) : # this is to create a condition over the references we create they must be in a certain format that s what we are doing here
-        anne = timezone.now().strftime('%y') # extraire annee of now
+            expeditions=Expedition.objects.filter(reference__startswith=prefix)
+            exped=expeditions.order_by('-reference')
+            latest_expeds=exped.first()
 
-        dernier = cls.objects.filter(reference__startswith=f"EXP_{anne}").order_by('reference').last() # here we are extracting the objects that their attribute reference starts with EXP and a year and then we order them by reference ascending of -reference descanding and ge tthe last item 
-        # dernier = cls.objects.filter(reference__startwith=f"EXP_{annee}").order_by('-reference').first()
-        compteur = int(dernier.reference[-5:])+1 if dernier else 1 #here we get the last 5 caracters of the attribute reference from the objects we retirieved from the db if they exist if they don t let s just have 1 instead
-
-        if compteur > 99999 : # here if the number is over 99999 we rause an exception
-            raise ValidationError("Limite exceeded")
-        return f""
-
-    def save(self,*args,**kwargs):#this is for making sure that when we save when the user uses the submit button if there s no reference one must be createed and then we do a full clean wich would  make sure of that clean attribute we made earlier 
-        if not self.reference :
-            self.reference = self._generate_reference()
+            if latest_expeds:
+                last_exped=int(latest_expeds.reference[-2:])
+                next_number=last_exped+1
+            else:
+                next_number=0
+            if next_number >99999:
+                raise ValueError("Maximum number of users reached for this year")
+            self.reference=prefix+str(next_number).zfill(5)
         self.full_clean()
         super().save(*args,**kwargs)
+
+    def clean(self):
+        super().clean()
+        if(self.entreprise_id and self.entreprise.type_entreprise!="chargeur"):
+            raise ValidationError("L entreprise de cette expedition n est pas un chargeur")
+        
+
+
+

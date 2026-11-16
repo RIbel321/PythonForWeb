@@ -3,8 +3,6 @@ from .models import Entreprise
 from .models import Utilisateur
 from django.contrib.auth.admin import UserAdmin
 
-admin.site.site_header = 'Transconnect - Administration'
-admin.site.site_title = 'Transconnect'
 # Register your models here.
 class UtilisateurAdmin(UserAdmin):
     list_display = ('user_id',"created_at")
@@ -13,7 +11,12 @@ class UtilisateurAdmin(UserAdmin):
         "user_id",
         "created_at"
     )
+    
 
 
-admin.site.register(Entreprise)
+class EntrepriseAdmin(admin.ModelAdmin):
+    search_fields=('matricule_fiscale','type_entreprise')
+    
+admin.site.register(Entreprise,EntrepriseAdmin)
 admin.site.register(Utilisateur, UtilisateurAdmin)
+

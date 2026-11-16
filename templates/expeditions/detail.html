@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<p>Welcome this is expedition :{{expedition.reference|lower}}</p>
+
+<form method="POST" action="{% url 'expedition:supprimer_exped' expedition.reference %}">
+
+    {% csrf_token %}
+    <button type="submit">Delete</button>
+
+
+</form>
+
+
+{% endblock %}  

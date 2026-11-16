@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h2>Liste des entreprises</h2>
+
+<table border="1">
+    <thead>
+        <tr>
+            <th>Matricule Fiscal</th>
+            <th>Date de création</th>
+            <th>Email utilisateur</th>
+            <th>Type d'entreprise</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for entreprise in entreprises %}
+        <tr>
+            <td> <a href="{% url 'entreprise:detail2' entreprise.matricule_fiscal %}">{{ entreprise.matricule_fiscal|lower }} </a> </td>
+            <td>{{ entreprise.created_at|date:"D/F/y H:i" }}</td>
+            <td>{{ entreprise.utilisateur.email }}</td>
+            <td>{{ entreprise.type_entreprise }}</td>
+        </tr>
+
+        {% empty %}
+        <tr>
+            <td colspan="4">No entreprises were found</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

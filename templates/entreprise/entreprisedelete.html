@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+{% for entreprise in entrepriser %}
+<p>{{entreprise.matricule_fiscal|lower}}</p>
+
+
+{% empty %}
+<p>No entreprises were found</p>
+{% endfor %}
+
+<form method="POST">
+
+    {% csrf_token %}
+    <button type="submit">Delete, you sure ?</button>
+
+
+</form>
+
+
+
+{% endblock %}

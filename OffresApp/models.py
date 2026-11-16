@@ -1,98 +1,79 @@
 from django.db import models
-from ExpeditionsApp.models import Expeditions
+
 from VehiculeApp.models import Vehicule
 from EntrepriseApp.models import Entreprise
+from ExpeditionsApp.models import Expedition
 from django.core.exceptions import ValidationError
-from django.core.validators import MinValueValidator
-from django.db import models,transaction
-
-
-
-class Offre(models.Model):
-    prix = models.DecimalField(
-        max_digits = 10,
-        decimal_places = 2,
-        validators = [MinValueValidator(0.01,"Le prix doit etre superieur a 0")],        
+from django.db import transaction
+# Create your models here.
+class Offres(models.Model):
+    prix=models.DecimalField(max_digits=20,decimal_places=2)
+    delai_jours=models.PositiveIntegerField()
+    statut=models.CharField(choices=[
+        ('proposee','Proposee'),
+        ('acceptee','Acceptee'),
+        ('proposee','Proposee'),
+        ('refusee','Reufusee'),
+        ('retiree','retiree')
+    ],default='proposee')
+    date_proposition=models.DateField(auto_now_add=True)
+    created_at=models.DateTimeField(auto_now_add=True)
+    updated_at=models.DateTimeField(auto_now=True)
+    expedition=models.ForeignKey(
+        Expedition,on_delete=models.CASCADE
     )
-
-    delai_jours = models.PositiveIntegerField(validators=[MinValueValidator(1)])
-
-    statut = models.CharField(
-        max_length=20,
-        choices=[
-            ('proposee', 'Proposee'),
-            ('acceptee', 'Acceptee'),
-            ('refusee', 'Refusee'),
-            ('retiree', 'Retiree'),
-        ],
-        default='proposee'
+    transporteur=models.ForeignKey(
+        Entreprise,on_delete=models.CASCADE
     )
-
-    date_proposition = models.DateField(auto_now_add=True)
-
-    expedition = models.ForeignKey(
-        Expeditions,
-        on_delete=models.CASCADE
+    vehicule=models.ForeignKey(
+        Vehicule,on_delete=models.CASCADE   
     )
-
-    transporteur = models.ForeignKey(
-        Entreprise,
-        on_delete=models.CASCADE
-    )
-
-    vehicule = models.ForeignKey(
-        Vehicule,
-        on_delete=models.CASCADE
-    )
-
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    updated_at = models.DateTimeField(auto_now=True)
 
     def clean(self):
-        if (self.transporteur_id and self.transporteur.type_transporteur != 'transporteur'):
-            raise ValidationError({'Entreprise':'doit etre de type transporteur'})
-        if (self.transporteur_id and self.vehicule.vehicule_id):
-            if self.vehicule.entreprise_id != self.transporteur.transporteur_id :
-                raise ValidationError({'Vehicule':'Cette vehicule doit etre avec le meme transporteur que l offre'})
-        if (self.expedition and self.expedition.expedition_id.statut != 'publiee'):
-            raise ValidationError({'Expedition':'on ne peut pas cree un offre avec une expedition qui n est pas publiee'})
-        if (self.pk and self.expedition.expedition_id and self.transporteur.transporteur_id and self.statut=='proposee'):
-            offres_existantes=Offre.objects.filter(expedition_id=self.expedition.expedition_id,transporteur_id=self.transporteur.transporteur_id
-            ,statut='proposee')
-            if self.pk:
-                offres_existantes=offres_existantes.exclude(pk=self.pk)
-            if offres_existantes.exists():
-                raise ValidationError('Cette entreprise a deja une offre active pour cette expedition')
-        if(self.vehicule and not self.vehicule.disponible):
-            raise ValidationError('Ce vehicule n est pas disponible')
-        if (self.vehicule_id and self.expedition_id):
-            poids=self.expedition.poids_kg
-            capacites_max = {
-            'camionnette': 1500,
-            'fourgon': 3500,
-            'camion_porteur': 19000,
-            'semi_remorque': 26000,
-            }
-            type_vehicule=self.vehicule.type_vehicule
-            capacites_max=capacites_max[type_vehicule]
-            if poids > capacite_max:
-                raise ValidationError({
-                    'vehicule': (
-                        f"Le véhicule de type {type_vehicule} "
-                        f"ne peut pas transporter une expédition de {poids} kg."
-                    )
-                })
+        super().clean()
+        #if(self.transporteur_id and self.transporteur.type_entreprise!='transporteur'):
+        #    raise ValidationError("L entreprise de cette offre doit etre de type transporteur")
+        if(self.vehicule_id and self.transporteur_id and self.vehicule.Entreprise!=self.transporteur):
+            raise ValidationError("Cette Vehicule doit appartenir au meme transporteur ")
+        if (self.expedition_id and self.expedition.statut!='publiee'):
+            raise ValidationError("Cette offre doit avoir une statut publiee")
 
+        if (self.expedition_id and self.transporteur_id and self.statut=='proposee'):
+            offresproposee=Offres.objects.filter(statut='proposee')
+            offressimilaire=offresproposee.filter(expedition_id=self.expedition_id , transporteur_id=self.transporteur_id).exclude(pk=self.pk)
+            if offressimilaire:
+                raise ValidationError("on ne peut pas avoir deux offres au statut proposee actives simultanement sur la meme expedition")
 
-    def save(self, *args, **kwargs):
+        if (self.vehicule_id and not self.vehicule.disponible):
+            raise ValidationError("Cette Voiture n est pas disponible")
+        if (self.vehicule_id and self.vehicule.type_vehicule=='camionette' and self.expedition.poids_kg/1000>1.5):
+            raise ValidationError("incompatibilite avec la capacite en T")
+        if (self.vehicule_id and self.vehicule.type_vehicule=='camion_porteur' and (self.expedition.poids_kg/1000>19 or self.expedition.poids_kg/1000<3.5)):
+            raise ValidationError("incompatibilite avec la capacite en T")
+        if (self.vehicule_id and self.vehicule.type_vehicule=='semi_remorque' and (self.expedition.poids_kg/1000<19 or self.expedition.poids_kg/1000>26)):
+            raise ValidationError("incompatibilite avec la capacite en T")
+        if (self.vehicule_id and self.vehicule.type_vehicule=='fourgon' and self.expedition.poids_kg/1000>3.5):
+            raise ValidationError("incompatibilite avec la capacite en T")
+
+    def accepter(self):
         with transaction.atomic():
-            anicent_statut=None
-            if self.pk :
-                ancienne_offre=Offre.objects.get(pk=self.pk)
-                anicent_statut=ancienne_offre.statut
+            if (self.statut=='proposee'):
+                self.statut="acceptee"
+                self.save()
                 self.expedition.statut='attribuee'
                 self.expedition.save()
-                Offre.objects.filter(expedition_id=self.expedition_id,statut='proposee').exclude(pk=self.pk).update(statut='refusee')
-        self.full_clean()
-        super().save(*args, **kwargs)
+                others=Offres.objects.filter(expedition_id=self.expedition_id,statut='proposee').exclude(pk=self.pk)
+                others.update(statut='refusee')
+    
+    def save(self,*args,**kwargs):
+        with transaction.atomic():
+            if self.pk :
+                ancienne_offres=Offres.objects.get(pk=self.pk)
+                ancienne_statut=ancienne_offres.statut
+                if (self.statut=='acceptee' and ancienne_statut=='proposee'):
+                    self.expedition.statut='attribuee'
+                    self.expedition.save()
+                    others=Offres.objects.filter(expedition_id=self.expedition_id,statut='proposee').exclude(pk=self.pk)
+                    others.update(statut='refusee')
+            self.full_clean()
+            super().save(*args,**kwargs)

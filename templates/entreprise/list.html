@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+{% for entreprise in entrepriser %}
+<p> <a href="{% url 'entreprise:detail_ent'  entreprise.pk %}">{{entreprise.matricule_fiscal|lower}}</a></p>
+<p>{{entreprise.created_at|date:"D/F/y H:i"}}</p>
+
+
+{% empty %}
+<p>No entreprises were found</p>
+{% endfor %}
+
+
+{% endblock %}
