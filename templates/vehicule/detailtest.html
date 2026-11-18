@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h2>Détails du véhicule</h2>
+
+<table border="1">
+    <thead>
+        <tr>
+            <th>Immatriculation</th>
+            <th>Type</th>
+            <th>Capacité (kg)</th>
+            <th>Disponible</th>
+            <th>Entreprise</th>
+            <th>Date d'ajout</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        <tr>
+            <td>{{ vehicule.immatriculation }}</td>
+            <td>{{ vehicule.type_vehicule }}</td>
+            <td>{{ vehicule.capacite_kg }}</td>
+            <td>{{ vehicule.disponible }}</td>
+            <td>{{ vehicule.entreprise }}</td>
+            <td>{{ vehicule.created_at|date:"d/m/Y H:i" }}</td>
+        </tr>
+    </tbody>
+</table>
+
+<p>
+    <a href="{% url 'vehicule:vehicule_delete' vehicule.pk %}">
+        Supprimer ce véhicule
+    </a>
+</p>
+
+<p>
+    <a href="{% url 'vehicule:vehicule_update' vehicule.pk %}">
+        Modifier ce véhicule
+    </a>
+</p>
+
+<p>
+    <a href="{% url 'vehicule:list_vehicule' %}">
+        Retour à la liste
+    </a>
+</p>
+
+{% endblock %}
+

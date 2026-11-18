@@ -33,7 +33,7 @@ class Offres(models.Model):
         super().clean()
         #if(self.transporteur_id and self.transporteur.type_entreprise!='transporteur'):
         #    raise ValidationError("L entreprise de cette offre doit etre de type transporteur")
-        if(self.vehicule_id and self.transporteur_id and self.vehicule.Entreprise!=self.transporteur):
+        if(self.vehicule_id and self.transporteur_id and self.vehicule.entreprise!=self.transporteur):
             raise ValidationError("Cette Vehicule doit appartenir au meme transporteur ")
         if (self.expedition_id and self.expedition.statut!='publiee'):
             raise ValidationError("Cette offre doit avoir une statut publiee")

@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h2>Liste des véhicules</h2>
+
+<p><a href="{% url 'vehicule:vehicule_create' %}">Créer un véhicule</a></p>
+
+<table border="1">
+    <thead>
+        <tr>
+            <th>Immatriculation</th>
+            <th>Type</th>
+            <th>Capacité (kg)</th>
+            <th>Disponible</th>
+            <th>Entreprise</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for vehicule in vehicules %}
+        <tr>
+            <td><a href="{% url 'vehicule:detail_vehicule' vehicule.pk %}">{{ vehicule.immatriculation }}</a></td>
+            <td>{{ vehicule.type_vehicule }}</td>
+            <td>{{ vehicule.capacite_kg }}</td>
+            <td>{{ vehicule.disponible }}</td>
+            <td>{{ vehicule.entreprise }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="5">Aucun véhicule trouvé</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}
+

@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h2>Détails de l'offre</h2>
+
+<table border="1">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Prix</th>
+            <th>Délai (jours)</th>
+            <th>Statut</th>
+            <th>Expédition</th>
+            <th>Transporteur</th>
+            <th>Véhicule</th>
+            <th>Date proposition</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        <tr>
+            <td>{{ offre.pk }}</td>
+            <td>{{ offre.prix }}</td>
+            <td>{{ offre.delai_jours }}</td>
+            <td>{{ offre.statut }}</td>
+            <td>{{ offre.expedition }}</td>
+            <td>{{ offre.transporteur }}</td>
+            <td>{{ offre.vehicule }}</td>
+            <td>{{ offre.date_proposition|date:"d/m/Y" }}</td>
+        </tr>
+    </tbody>
+</table>
+
+<p>
+    <a href="{% url 'offres:offre_delete' offre.pk %}">
+        Supprimer cette offre
+    </a>
+</p>
+
+<p>
+    <a href="{% url 'offres:offre_update' offre.pk %}">
+        Modifier cette offre
+    </a>
+</p>
+
+<p>
+    <a href="{% url 'offres:list_offres' %}">
+        Retour à la liste
+    </a>
+</p>
+
+{% endblock %}
+

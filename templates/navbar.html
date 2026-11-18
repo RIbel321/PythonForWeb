@@ -1,8 +1,12 @@
 <nav>
     <a href="{% url 'entreprise:home' %}">Home</a>
+    <a href="{% url 'entreprise:list_ent' %}">Entreprises</a>
+    <a href="{% url 'expedition:list_exped' %}">Expéditions</a>
+    <a href="{% url 'vehicule:list_vehicule' %}">Véhicules</a>
+    <a href="{% url 'offres:list_offres' %}">Offres</a>
+    |
     <a href="{% url 'entreprise:liste_entreprise' %}">liste_entreprise</a>
     <a href="{% url 'entreprise:filtre' %}">filtre</a>
     <a href="{% url 'entreprise:All' %}">All_entreprise</a>
     <a href="{% url 'expedition:All_exped' %}">All_expeditions</a>
-
 </nav>

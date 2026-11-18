@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h2>Supprimer l'offre</h2>
+
+<p>Êtes-vous sûr de vouloir supprimer l'offre : <strong>Offre #{{ offre.pk }}</strong> (Prix: {{ offre.prix }}) ?</p>
+
+<form method="POST">
+    {% csrf_token %}
+    <button type="submit">Delete, are you sure?</button>
+</form>
+
+<p>
+    <a href="{% url 'offres:list_offres' %}">Annuler</a>
+</p>
+
+{% endblock %}
+

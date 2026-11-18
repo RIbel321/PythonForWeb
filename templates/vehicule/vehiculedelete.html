@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h2>Supprimer le véhicule</h2>
+
+<p>Êtes-vous sûr de vouloir supprimer le véhicule : <strong>{{ vehicule.immatriculation }}</strong> ?</p>
+
+<form method="POST">
+    {% csrf_token %}
+    <button type="submit">Delete, are you sure?</button>
+</form>
+
+<p>
+    <a href="{% url 'vehicule:list_vehicule' %}">Annuler</a>
+</p>
+
+{% endblock %}
+

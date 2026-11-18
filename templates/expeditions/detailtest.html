@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h2>Details de l'expedition</h2>
+
+<table border="1">
+    <thead>
+        <tr>
+            <th>Reference</th>
+            <th>Statut</th>
+            <th>Entreprise</th>
+            <th>Date de creation</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        <tr>
+            <td>{{ expedition.reference }}</td>
+            <td>{{ expedition.statut }}</td>
+            <td>{{ expedition.entreprise }}</td>
+            <td>{{ expedition.created_at|date:"d/m/Y H:i" }}</td>
+        </tr>
+    </tbody>
+</table>
+
+<p>
+    <a href="{% url 'expedition:expedition_delete' expedition.pk %}">
+        Supprimer cette expedition
+    </a>
+</p>
+
+<p>
+    <a href="{% url 'expedition:expedition_update' expedition.pk %}">
+        Modifier Cette expedition
+    </a>
+</p>
+
+<p>
+    <a href="{% url 'expedition:list_exped' %}">
+        Retour à la liste
+    </a>
+</p>
+
+{% endblock %}
